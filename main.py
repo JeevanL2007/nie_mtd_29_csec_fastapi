@@ -12,11 +12,14 @@ app = FastAPI()
 def home():
     return {"message" : "Hello World"}
 db = {        #defining a array ...contains dictionaries of tickets
-    1 : {"id" : 1 , "title" : "computer is not on",     #defining cred operations on tickets.
-    "description" : "power button is not working"},
-    2 : {"id" : 2 , "title" : "internet is not working",
-        "description" : "wifi prob",
-        "category" : "Hardware", "status" : "NEW"}
+    1 : {"id" : 1 , "title" : "Anirudh",     #defining cred operations on tickets.
+    "description" : "HR manager" , "category" : "IT" , "status" : "ACTIVE"},
+    2 : {"id" : 2 , "title" : "Harsh",
+        "description" : "HR executive",
+        "category" : "IT", "status" : "ACTIVE"},
+    3 : {"id" : 3 , "title" : "Himanshu" ,
+         "description" : "Employee" , "category" : "IT" , "status" : "active"
+    }
 }
 
 
@@ -53,7 +56,7 @@ def ticket_create(ticket_payload : TicketCreate):
     return db[new_id]
 
 @app.put("/tickets/{id}",response_model=TicketResponse)
-def ticket_update(id : int , **ticket_payload: TicketCreate):
+def ticket_update(id : int , ticket_payload: TicketCreate):
     if id not in db:
         raise HTTPException(status_code=404 , detail="Ticket not found")
     db[id] = {"id" : id, **ticket_payload.model_dump()}
