@@ -1,0 +1,913 @@
+Setting up the working direction:
+
+C:\nie_work
+    --> apps\tickets_app\
+        --> server\
+            main.py
+        --> client\
+            it is the vite project dir
+
+Demo of the app (full stack)
+
+Run server: uvicorn main:app --reload
+Run client: npm run dev 
+
+
+
+
+Code Implementation:
+Service 
+    src/api.js
+Components 
+    src/Register.jsx 
+=====================================
+import { useState } from 'react';
+import api from './api';
+=====================================
+const [form, setForm] = useState({username:'', password:'', role:1});
+    const register = async () => {
+        try {            
+            const response = await api.post('/users', {... form});
+            if(response.status !== 201) {
+                alert(response.data.detail);
+                return;
+            }
+            alert('User created');
+            setForm({username:'', password:'', role:1});
+        } catch(error) {
+            alert(error.response?.data?.detail || 'User creation failed');
+        }
+    };
+=====================================
+<div className="container mt-4">
+            <div className="card p-4 mx-auto" style={{maxWidth: '500px'}}>
+                <h2>Create User</h2>
+                <label className="form-label">
+                    Username
+                </label>
+                <input
+                    className="form-control mb-3"
+                    value={form.username}
+                    onChange={ e => setForm( {...form, username:e.target.value} ) }
+                />
+                <label className="form-label">Password</label>
+
+                <input
+                    type="password"
+                    className="form-control mb-3"
+                    value={form.password}
+                    onChange={ e => setForm( {...form, password:e.target.value} ) }
+                />
+
+                <label className="form-label">Role</label>
+
+                <select
+                    className="form-select mb-3"
+                    value={form.role}
+                    onChange={ e => setForm( {...form, role:Number(e.target.value)} ) } >
+                    <option value="1">Employee</option>
+                    <option value="2">Engineer</option>
+                    <option value="3">Lead</option>
+                    <option value="4">Admin</option>
+                </select>
+
+                <button className="btn btn-primary" onClick={register}>Create User</button>
+            </div>
+        </div>
+=====================================
+    src/Login.jsx 
+=====================================
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from './api';
+=====================================
+const navigate = useNavigate();
+
+    const [form, setForm] = useState({
+        username: '',
+        password: ''
+    });
+
+    const login = async () => {
+        const data = new URLSearchParams();
+
+        data.append('username', form.username);
+        data.append('password', form.password);
+
+        const response = await api.post('/login', data);
+
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('username', form.username);
+        
+        navigate('/tickets');
+    };
+=====================================
+<div className="container mt-5">
+            <div
+                className="card p-4 mx-auto"
+                style={{maxWidth: '400px'}}
+            >
+                <h2 className="text-center mb-4">
+                    Ticket Management
+                </h2>
+
+                <label className="form-label">
+                    Username
+                </label>
+
+                <input
+                    className="form-control mb-3"
+                    value={form.username}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            username: e.target.value
+                        })
+                    }
+                />
+
+                <label className="form-label">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    className="form-control mb-3"
+                    value={form.password}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            password: e.target.value
+                        })
+                    }
+                />
+
+                <button
+                    className="btn btn-primary"
+                    onClick={login}
+                >
+                    Login
+                </button>
+            </div>
+        </div>
+=====================================
+    src/TicketForm.jsx 
+    src/TicketList.jsx 
+App 
+    src/App.jsx
+    
+
+
+Register [Done]
+Login [Tried]
+    -> Logged In Page
+        TicketList.jsx -> Initial Page 
+App Component 
+    Define Routers Register <-> Login <-> TicketList <-> TicketForm 
+    Write the Nav Bar Code -> To display header of the page 
+
+    src/Login.jsx 
+=====================================
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from './api';
+=====================================
+const navigate = useNavigate();
+
+    const [form, setForm] = useState({
+        username: '',
+        password: ''
+    });
+
+    const login = async () => {
+        const data = new URLSearchParams();
+
+        data.append('username', form.username);
+        data.append('password', form.password);
+
+        const response = await api.post('/login', data);
+
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('username', form.username);
+        
+        navigate('/tickets');
+    };
+=====================================
+<div className="container mt-5">
+            <div
+                className="card p-4 mx-auto"
+                style={{maxWidth: '400px'}}
+            >
+                <h2 className="text-center mb-4">
+                    Ticket Management
+                </h2>
+
+                <label className="form-label">
+                    Username
+                </label>
+
+                <input
+                    className="form-control mb-3"
+                    value={form.username}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            username: e.target.value
+                        })
+                    }
+                />
+
+                <label className="form-label">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    className="form-control mb-3"
+                    value={form.password}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            password: e.target.value
+                        })
+                    }
+                />
+
+                <button
+                    className="btn btn-primary"
+                    onClick={login}
+                >
+                    Login
+                </button>
+            </div>
+        </div>
+=====================================
+
+
+App.jsx
+=====================================
+import Login from './Login';
+import Register from './Register';
+import TicketList from './TicketList';
+import TicketForm from './TicketForm';
+
+function ProtectedRoute({ children }) {
+    const token = localStorage.getItem('token');
+
+    return token ? children : <Navigate to="/login" />;
+}
+=====================================
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        navigate('/login');
+    };
+=====================================
+
+        <nav className="navbar navbar-dark bg-dark px-3">
+
+            <Link className="navbar-brand" to={token ? "/tickets" : "/login"}>
+                Ticket Management
+            </Link>
+
+            <div>
+                {token ? (
+                    <>
+                        <Link className="btn btn-light me-2" to="/tickets">
+                            Tickets
+                        </Link>
+
+                        <Link className="btn btn-light me-2" to="/tickets/new">
+                            New Ticket
+                        </Link>
+
+                        <Link className="btn btn-light me-2" to="/register">
+                            Register
+                        </Link>
+
+                        <span className="text-white me-3">
+                            {username}
+                        </span>
+
+                        <button
+                            className="btn btn-danger"
+                            onClick={logout}
+                        >
+                            Logout
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <Link className="btn btn-light me-2" to="/login">
+                            Login
+                        </Link>
+
+                        <Link className="btn btn-light" to="/register">
+                            Register
+                        </Link>
+                    </>
+                )}
+            </div>
+
+        </nav>
+=====================================
+        <BrowserRouter>
+
+            <Navigation />
+
+            <Routes>
+
+                <Route
+                    path="/"
+                    element={
+                        localStorage.getItem('token')
+                            ? <Navigate to="/tickets" />
+                            : <Navigate to="/login" />
+                    }
+                />
+
+                <Route path="/login" element={<Login />} />
+
+                <Route
+                    path="/tickets"
+                    element={
+                        <ProtectedRoute>
+                            <TicketList />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/tickets/new"
+                    element={
+                        <ProtectedRoute>
+                            <TicketForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/tickets/edit/:id"
+                    element={
+                        <ProtectedRoute>
+                            <TicketForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/register"
+                    element={
+                        <ProtectedRoute>
+                            <Register />
+                        </ProtectedRoute>
+                    }
+                />
+
+            </Routes>
+
+        </BrowserRouter>
+=====================================
+
+
+import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+=====================================
+
+
+
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from './api';
+
+function TicketList() {
+    const navigate = useNavigate();
+
+    const [tickets, setTickets] = useState([]);
+
+    const getTickets = async () => {
+        const response = await api.get('/tickets', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        setTickets(response.data);
+    };
+
+    const deleteTicket = async (id) => {
+        await api.delete(`/tickets/${id}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        getTickets();
+    };
+
+    useEffect(() => {
+        getTickets();
+    }, []);
+
+    return (
+        <div className="container mt-4">
+            <div className="d-flex justify-content-between mb-3">
+                <h2>Tickets</h2>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => navigate('/tickets/new')}
+                >New Ticket</button>
+            </div>
+            <table className="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tickets.map(ticket => (
+                        <tr key={ticket.id}>
+                            <td>{ticket.title}</td>
+                            <td>{ticket.description}</td>
+                            <td>{ticket.category}</td>
+                            <td>{ticket.status}</td>
+                            <td>
+                                <button
+                                    className="btn btn-warning btn-sm me-2"
+                                    onClick={() =>
+                                        navigate(`/tickets/edit/${ticket.id}`)
+                                    }
+                                >Edit</button>
+                                <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() =>
+                                        deleteTicket(ticket.id)
+                                    }
+                                >Delete</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+export default TicketList;
+
+
+========================================================
+
+--TicketForm.jsx--
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import api from './api';
+
+function TicketForm() {
+
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+    const [form, setForm] = useState({
+        title: '',
+        description: '',
+        category: '',
+        status: 'NEW'
+    });
+
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        if (id) {
+            getTicket();
+        }
+    }, [id]);
+
+    const getTicket = async () => {
+        const response = await api.get(`/tickets/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        setForm(response.data);
+    };
+
+    const saveTicket = async () => {
+
+        if (id) {
+            await api.put(`/tickets/${id}`, form, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            alert('Ticket updated');
+        } else {
+            await api.post('/tickets', form, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            alert('Ticket created');
+        }
+
+        navigate('/tickets');
+    };
+
+    return (
+        <div className="container mt-4">
+
+            <div className="card p-4 mx-auto" style={{maxWidth: '600px'}}>
+
+                <h2>
+                    {id ? 'Edit Ticket' : 'New Ticket'}
+                </h2>
+
+                <label className="form-label">Title</label>
+
+                <input
+                    className="form-control mb-3"
+                    value={form.title}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            title: e.target.value
+                        })
+                    }
+                />
+
+                <label className="form-label">Description</label>
+
+                <textarea
+                    className="form-control mb-3"
+                    value={form.description}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            description: e.target.value
+                        })
+                    }
+                />
+
+                <label className="form-label">Category</label>
+
+                <select
+                    className="form-select mb-3"
+                    value={form.category}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            category: e.target.value
+                        })
+                    }
+                >
+                    <option value="">Select Category</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Software">Software</option>
+                    <option value="Network">Network</option>
+                </select>
+
+                <label className="form-label">Status</label>
+
+                <select
+                    className="form-select mb-3"
+                    value={form.status}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            status: e.target.value
+                        })
+                    }
+                >
+                    <option value="NEW">NEW</option>
+                    <option value="ASSIGNED">ASSIGNED</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="ON_HOLD">ON_HOLD</option>
+                    <option value="RESOLVED">RESOLVED</option>
+                    <option value="CLOSED">CLOSED</option>
+                </select>
+
+                <button
+                    className="btn btn-primary"
+                    onClick={saveTicket}
+                >
+                    {id ? 'Update Ticket' : 'Create Ticket'}
+                </button>
+
+            </div>
+
+        </div>
+    );
+}
+
+export default TicketForm;
+
+
+========================================================
+
+
+
+--Register.jsx---
+
+
+
+import { useState } from 'react';
+import api from './api';
+
+function Register() {
+    const [form, setForm] = useState({username:'', password:'', role:1});
+    const register = async () => {
+        try {            
+            const response = await api.post('/users', {... form});
+            if(response.status !== 201) {
+                alert(response.data.detail);
+                return;
+            }
+            alert('User created');
+            setForm({username:'', password:'', role:1});
+        } catch(error) {
+            alert(error.response?.data?.detail || 'User creation failed');
+        }
+    }; 
+    return (
+        <div className="container mt-4">
+            <div className="card p-4 mx-auto" style={{maxWidth: '500px'}}>
+                <h2>Create User</h2>
+                <label className="form-label">
+                    Username
+                </label>
+                <input
+                    className="form-control mb-3"
+                    value={form.username}
+                    onChange={ e => setForm( {...form, username:e.target.value} ) }
+                />
+                <label className="form-label">Password</label>
+
+                <input
+                    type="password"
+                    className="form-control mb-3"
+                    value={form.password}
+                    onChange={ e => setForm( {...form, password:e.target.value} ) }
+                />
+
+                <label className="form-label">Role</label>
+
+                <select
+                    className="form-select mb-3"
+                    value={form.role}
+                    onChange={ e => setForm( {...form, role:Number(e.target.value)} ) } >
+                    <option value="1">Employee</option>
+                    <option value="2">Engineer</option>
+                    <option value="3">Lead</option>
+                    <option value="4">Admin</option>
+                </select>
+
+                <button className="btn btn-primary" onClick={register}>Create User</button>
+            </div>
+        </div>
+    );
+}
+
+export default Register;
+
+
+=====================================================
+
+
+--- Login.jsx ----
+
+
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from './api';
+
+function Login() {
+    const navigate = useNavigate();
+
+    const [form, setForm] = useState({
+        username: '',
+        password: ''
+    });
+
+    const login = async () => {
+        const data = new URLSearchParams();
+
+        data.append('username', form.username);
+        data.append('password', form.password);
+
+        const response = await api.post('/login', data);
+
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('username', form.username);
+        
+        navigate('/tickets');
+    };
+
+    return (
+        <div className="container mt-5">
+            <div
+                className="card p-4 mx-auto"
+                style={{maxWidth: '400px'}}
+            >
+                <h2 className="text-center mb-4">
+                    Ticket Management
+                </h2>
+
+                <label className="form-label">
+                    Username
+                </label>
+
+                <input
+                    className="form-control mb-3"
+                    value={form.username}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            username: e.target.value
+                        })
+                    }
+                />
+
+                <label className="form-label">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    className="form-control mb-3"
+                    value={form.password}
+                    onChange={e =>
+                        setForm({
+                            ...form,
+                            password: e.target.value
+                        })
+                    }
+                />
+
+                <button
+                    className="btn btn-primary"
+                    onClick={login}
+                >
+                    Login
+                </button>
+            </div>
+        </div> 
+    );
+}
+
+export default Login;
+
+
+
+========================================================
+
+
+---App.jsx----
+
+
+
+import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+
+import Login from './Login';
+import Register from './Register';
+import TicketList from './TicketList';
+import TicketForm from './TicketForm';
+
+
+function ProtectedRoute({ children }) {
+    const token = localStorage.getItem('token');
+
+    return token ? children : <Navigate to="/login" />;
+}
+
+function Navigation() {
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        navigate('/login');
+    };
+    return (
+       <nav className="navbar navbar-dark bg-dark px-3">
+
+            <Link className="navbar-brand" to={token ? "/tickets" : "/login"}>
+                Ticket Management
+            </Link>
+
+            <div>
+                {token ? (
+                    <>
+                        <Link className="btn btn-light me-2" to="/tickets">
+                            Tickets
+                        </Link>
+
+                        <Link className="btn btn-light me-2" to="/tickets/new">
+                            New Ticket
+                        </Link>
+
+                        <Link className="btn btn-light me-2" to="/register">
+                            Register
+                        </Link>
+
+                        <span className="text-white me-3">
+                            {username}
+                        </span>
+
+                        <button
+                            className="btn btn-danger"
+                            onClick={logout}
+                        >
+                            Logout
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <Link className="btn btn-light me-2" to="/login">
+                            Login
+                        </Link>
+
+                        <Link className="btn btn-light" to="/register">
+                            Register
+                        </Link>
+                    </>
+                )}
+            </div>
+
+        </nav>
+    );
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+
+            <Navigation />
+
+            <Routes>
+
+                <Route
+                    path="/"
+                    element={
+                        localStorage.getItem('token')
+                            ? <Navigate to="/tickets" />
+                            : <Navigate to="/login" />
+                    }
+                />
+
+                <Route path="/login" element={<Login />} />
+
+                <Route
+                    path="/tickets"
+                    element={
+                        <ProtectedRoute>
+                            <TicketList />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/tickets/new"
+                    element={
+                        <ProtectedRoute>
+                            <TicketForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/tickets/edit/:id"
+                    element={
+                        <ProtectedRoute>
+                            <TicketForm />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/register"
+                    element={
+                        
+                            <Register />
+                        
+                    }
+                />
+
+            </Routes>
+
+        </BrowserRouter>
+    );
+}
+
+export default App;
+
+========================================================
