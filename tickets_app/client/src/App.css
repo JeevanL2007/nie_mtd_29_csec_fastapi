@@ -1,0 +1,103 @@
+/* =====================================================
+   GLOBAL
+   ===================================================== */
+
+body {
+  margin: 0;
+  background-color: #f5f7fa;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =====================================================
+   PAGE CONTAINER
+   ===================================================== */
+
+.page-container {
+  padding-top: 35px;
+  padding-bottom: 50px;
+}
+
+
+/* =====================================================
+   FORM CARD
+   ===================================================== */
+
+.form-card {
+  max-width: 550px;
+  margin: 0 auto;
+  padding: 30px;
+  border: none;
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =====================================================
+   TICKET CARD
+   ===================================================== */
+
+.ticket-card {
+  border: none;
+  border-radius: 12px;
+
+  box-shadow:
+    0 3px 15px rgba(0, 0, 0, 0.08);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+/* Ticket hover effect */
+
+.ticket-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =====================================================
+   NAVBAR
+   ===================================================== */
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   TEXTAREA
+   ===================================================== */
+
+textarea {
+  resize: vertical;
+}
+
+
+/* =====================================================
+   BUTTONS
+   ===================================================== */
+
+.btn {
+  border-radius: 6px;
+}
+
+
+/* =====================================================
+   RESPONSIVE NAVBAR
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  .navbar .container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+}
